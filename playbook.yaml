@@ -1,0 +1,22 @@
+---
+- name: Fetch attributes from UTF-8 Unicode text format registry file
+  hosts: your_target_host
+  tasks:
+    - name: Read registry file
+      slurp:
+        src: /home/ansadmin/registry_file.ini
+      register: registry_content
+
+    - name: Convert registry file content from base64
+      set_fact:
+        registry_data: "{{ registry_content.content | b64decode | decode('utf-8') }}"
+
+    - name: Parse INI content
+      ini:
+        content: "{{ registry_data }}"
+      register: parsed_ini
+
+    - name: Create backup file on Ansible control host
+      copy:
+        content: "{{ parsed_ini }}"
+        dest: /home/ansadmin/registrybackup
